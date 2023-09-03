@@ -50,10 +50,8 @@ Nota: use `confidence=0.3`.
 # RESPUESTA
 
 rules <- apriori(Groceries, parameter=list(support=0.01, confidence=0.3))
-rules.sorted <- sort(rules, by="lift")
+rules.sorted <- sort(rules, by="support") # La ocurrencia esta ligada al support
 inspect(head(rules.sorted, 7))
-```
-```{r}
 ```
 
 **1.2** Usando las reglas obtenidas en la pregunta anterior genere un histograma de los soportes. ¿Que puede notar con respecto a la distribución soporte de las reglas?
@@ -66,7 +64,7 @@ hist(rules.sorted@quality$support, main = "Histograma de Soporte", xlab = "Sopor
 ```
 
 **R:**
-Podemos notar que los soportes con mayor frecuencia son los que se encuentran entre 0.01 y 0.02, y que a medida que el soporte aumenta, la frecuencia disminuye.
+Podemos notar que los soportes con mayor frecuencia son los que se encuentran entre 0.01 y 0.02, y que a medida que el soporte aumenta, la frecuencia disminuye. Por lo tanto, se deduce una tendencia a que las reglas tengan un bajo soporte
 
 **1.3** Muestre 10 reglas de asociación que más podrían ayudar a un supermercado a crear recomendaciones de productos.
 Emplee *Apriori* con `confidence=0.3` y que la regla aparezca en al menos un 2% del dataset.
@@ -83,8 +81,11 @@ inspect(head(rules2.sorted, 10))
 Lift estima la probabilidad condicional de que se compre un conjunto de productos Y
 dada la aparacion de itemset X (i.e. estima P(Y|X)).
 
-Por definicion de probabilidad, lift nos da una medida de la certeza de que se compre Y dado que se compra X
-que es precisamente lo que más le podría ayuda al supermercado (comercialmente)
+Por definicion de probabilidad, lift nos da una medida de la certeza de que se compre Y dado que se compra X,
+lo cual es precisamente lo que más le podría ayuda al supermercado (comercialmente), pues tiene mayor caracter predictivo.
+
+Notamos que el lift es mayor a 1, lo que nos indica que las reglas mostradas estan *positivamente correlacionadas*. 
+Adicionalmente, notemos que los productos consecuentes son todos vegetales o leche entera.
 
 
 **1.4** Ocupando las reglas de la pregunta anterior obtenga el lift mas bajo ¿Qué puede concluir con respecto a la relacion de los antecendente y consecuentes de estas reglas? ¿Que significa esto en terminos de grupos de productos?
@@ -98,7 +99,7 @@ inspect(head(rules2_dec, 1))
 ```
 **R:**
 Notamos que el lift mas bajo sigue siendo un valor mayor a 1. 
-Esto nos dice que todos las reglas obtenidas tienen un lift mayor a 1, luego la relacion de los antecedentes y consecuentes de estas reglas es de una correlación positiva.
+Esto nos dice que **todas** las reglas obtenidas tienen un lift mayor a 1, luego la relacion de los antecedentes y consecuentes de estas reglas es de una correlación positiva.
 En términos de productos, podemos concluir que llevar un producto del antecedente aumenta la probabilidad de llevar un producto del consecuente, y que al comprar es probable que se lleve whole milk.
 
 
