@@ -1,0 +1,119 @@
+---
+title: 'Laboratorio 2 - Reglas de Asociación en R'
+author: 'Martín Bravo, Felipe Avendaño'
+date: "Septiembre 2023"
+output: 
+  html_document: 
+    theme: cosmo
+    toc: yes
+editor_options: 
+  markdown: 
+    wrap: sentence
+---
+
+# Declaración de compromiso ético
+
+Nosotros Martín Bravo y Felipe Avendaño, declaramos que realizamos de manera grupal los pasos de la presente actividad.
+También declaramos no incurrir en copia, ni compartir nuestras respuestas con otras personas ni con otros grupos.
+Por lo que, ratificamos que las respuestas son de nuestra propia confección y reflejan nuestro propio conocimiento.
+
+# Instrucciones
+
+1.  Trabajen en equipos de dos personas. Salvo excepciones, no se corregirá entregas con menos de dos integrantes.
+
+2.  Modifique este archivo `.Rmd` agregando sus respuestas donde corresponda. Puede ocupar R-Studio en su computador o usar esta alternativa cloud "https://posit.cloud".
+
+3.  Para cada pregunta, cuando corresponda, **incluya el código fuente que utilizó para llegar a su respuesta**.
+
+4.  El formato de entrega para esta actividad es un archivo html. **Genere un archivo HTML usando RStudio** y súbalo a U-Cursos.
+
+Solo uno de los integrantes debe hacer la entrega.
+
+# Laboratorio
+
+Para la presente actividad usaremos un dataset extenso llamado `Groceries`.
+
+```{r, eval=T}
+library("arules")
+library("arulesViz")
+
+data(Groceries)
+inspect(head(Groceries))
+```
+
+**1.1** Usando el dataset `Groceries`, obtenga las reglas que se cumplen en más de un 1% del dataset.
+Muestre las top 7 reglas ((((más aterradoras))) con mayor ocurrencia ordenadas de mayor a menor.
+
+Nota: use `confidence=0.3`.
+
+```{r}
+# RESPUESTA
+
+rules <- apriori(Groceries, parameter=list(support=0.01, confidence=0.3))
+rules.sorted <- sort(rules, by="support") # La ocurrencia esta ligada al support
+inspect(head(rules.sorted, 7))
+```
+
+**1.2** Usando las reglas obtenidas en la pregunta anterior genere un histograma de los soportes. ¿Que puede notar con respecto a la distribución soporte de las reglas?
+
+```{r}
+# RESPUESTA
+
+hist(rules.sorted@quality$support, main = "Histograma de Soporte", xlab = "Soporte")
+
+```
+
+**R:**
+Podemos notar que los soportes con mayor frecuencia son los que se encuentran entre 0.01 y 0.02, y que a medida que el soporte aumenta, la frecuencia disminuye. Por lo tanto, se deduce una tendencia a que las reglas tengan un bajo soporte
+
+**1.3** Muestre 10 reglas de asociación que más podrían ayudar a un supermercado a crear recomendaciones de productos.
+Emplee *Apriori* con `confidence=0.3` y que la regla aparezca en al menos un 2% del dataset.
+Fundamente su respuesta en base a los resultados.
+
+```{r}
+# RESPUESTA
+rules2 <- apriori(Groceries, parameter = list(support = 0.02, confidence = 0.3))
+rules2.sorted <- sort(rules2, by = "lift")
+inspect(head(rules2.sorted, 10))
+```
+
+**R:**
+Lift estima la probabilidad condicional de que se compre un conjunto de productos Y
+dada la aparacion de itemset X (i.e. estima P(Y|X)).
+
+Por definicion de probabilidad, lift nos da una medida de la certeza de que se compre Y dado que se compra X,
+lo cual es precisamente lo que más le podría ayuda al supermercado (comercialmente), pues tiene mayor caracter predictivo.
+
+Notamos que el lift es mayor a 1, lo que nos indica que las reglas mostradas estan *positivamente correlacionadas*. 
+Adicionalmente, notemos que los productos consecuentes son todos vegetales o leche entera.
+
+
+**1.4** Ocupando las reglas de la pregunta anterior obtenga el lift mas bajo ¿Qué puede concluir con respecto a la relacion de los antecendente y consecuentes de estas reglas? ¿Que significa esto en terminos de grupos de productos?
+
+```{r}
+# RESPUESTA
+
+rules2_dec <- rules2
+rules2_dec <- sort(rules2_dec, by = "lift", decreasing = FALSE)
+inspect(head(rules2_dec, 1))
+```
+**R:**
+Notamos que el lift mas bajo sigue siendo un valor mayor a 1. 
+Esto nos dice que **todas** las reglas obtenidas tienen un lift mayor a 1, luego la relacion de los antecedentes y consecuentes de estas reglas es de una correlación positiva.
+En términos de productos, podemos concluir que llevar un producto del antecedente aumenta la probabilidad de llevar un producto del consecuente, y que al comprar es probable que se lleve whole milk.
+
+
+**1.5** El siguiente gráfico muestra las reglas obtenidas con Apriori con minsup=0.01 y minconf=0.1.
+Describa tres observaciones a partir del gráfico (por ejemplo: "la mayoría de las reglas tienen soporte menor a 0.05").
+
+```{r}
+rules <- apriori(Groceries, parameter=list(support=0.01, confidence=0.1))
+plot(rules)
+```
+
+**R:**
+1. La mayoría de las reglas tienen soporte menor a 0.05
+
+2. La mayoría de las reglas tienen confianza menor a 0.5
+
+3. La mayoría de las reglas tienen lift menor a 2
